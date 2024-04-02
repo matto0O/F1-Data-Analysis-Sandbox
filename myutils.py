@@ -64,7 +64,7 @@ def best_times(laps: core.Laps) -> pd.DataFrame:
     result['OrderChange'] = result['BestTime'].rank(ascending=True) - result['TheoreticalBest'].rank(ascending=True)
     return result
 
-def race_pace(laps: core.Laps) -> pd.DataFrame:
+def long_runs(laps: core.Laps) -> pd.DataFrame:
     if not "LapTimeSeconds" in laps.columns:
         laps = laps_simplified(laps)
 

@@ -20,7 +20,7 @@ laps = race.laps
 
 # print(speed_traps(race.laps))
 
-rp = race_pace(laps)
+rp = long_runs(laps)
 print(rp)
 
 # print(best_times(laps))
