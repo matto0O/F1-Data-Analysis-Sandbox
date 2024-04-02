@@ -15,32 +15,4 @@ race = event.get_race()
 race.load(telemetry=False, weather=False, messages=False)
 laps = race.laps
 
-# laps = laps_simplified(race.laps, 'GAS')
-# print(laps)
-
-# print(speed_traps(race.laps))
-
-rp = race_pace(laps)
-print(rp)
-
-# print(best_times(laps))
-
-# alonso = laps_simplified(laps, 'ALO')
-
-# print(russell)
-
-# xRussell = russell['LapNumber']
-# yRussell = russell['LapTimeSeconds']
-
-# print(russell)
-# print(russell2)
-# print(best_times(laps_simplified(laps)))
-
-# xAlonso = alonso['LapNumber']
-# yAlonso = alonso['LapTimeSeconds']
-
-# plt.plot(xRussell, yRussell, label='Russell', color='blue')
-# plt.plot(xAlonso, yAlonso, label='Alonso', color='green')
-# plt.show()
-
-# TODO - practice theoretical bests, long run pace, speed traps, sector comparison
+# TODO - driver comparison, weather support, charts, telemetry
