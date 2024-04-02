@@ -11,7 +11,7 @@ from myutils import *
 
 event = fastf1.get_event(2024, 'Australia', backend='f1timing')
 
-race = event.get_practice(2)
+race = event.get_race()
 race.load(telemetry=False, weather=False, messages=False)
 laps = race.laps
 
@@ -20,7 +20,7 @@ laps = race.laps
 
 # print(speed_traps(race.laps))
 
-rp = long_runs(laps)
+rp = race_pace(laps)
 print(rp)
 
 # print(best_times(laps))

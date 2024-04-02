@@ -28,6 +28,15 @@ def remove_cruising(laps: core.Laps) -> core.Laps:
         df = pd.concat([df, driver[1][driver[1]['LapTimeSeconds'] <= 1.15 * driver[1]['LapTimeSeconds'].min()]])
     return df
 
+def remove_pitstops(laps: core.Laps) -> core.Laps:
+    laps = laps[laps['PitOutTime'].isnull()]
+    laps = laps[laps['PitInTime'].isnull()]
+    return laps
+
+def remove_safetycar(laps: core.Laps) -> core.Laps:
+    laps = laps[(laps['TrackStatus'] == '1') | (laps['TrackStatus'] == '2')]
+    return laps
+
 def filter_outliers(laps: core.Laps) -> core.Laps:
     laps = remove_cruising(laps)
     q75, q25 = laps['LapTimeSeconds'].quantile(0.75), laps['LapTimeSeconds'].quantile(0.25)
@@ -95,6 +104,40 @@ def long_runs(laps: core.Laps) -> pd.DataFrame:
 
     result.sort_values(by='AverageLapTime', inplace=True)
     return result[result['StintLength'] >= 5]
+
+def race_pace(laps: core.Laps) -> pd.DataFrame:
+    laps = remove_pitstops(laps)
+    laps = remove_safetycar(laps)
+
+    if not "LapTimeSeconds" in laps.columns:
+        laps = laps_simplified(laps)
+
+    result = pd.DataFrame(columns=['AverageLapTime', 'AverageS1', 'AverageS2', 'AverageS3', 'Stint', 'StartLap', 'EndLap', 'Compound', 'StartTyreWear', 'StintLength'])
+    lapsCopy = laps.copy()
+
+    for info in lapsCopy.groupby(['Driver', 'Stint']):
+        driver = info[1]
+        newStintDataFrame = pd.DataFrame\
+        (
+            {
+                'AverageLapTime': round(driver['LapTimeSeconds'].mean(), 3),
+                'AverageS1': round(driver['S1'].mean(), 3),
+                'AverageS2': round(driver['S2'].mean(), 3),
+                'AverageS3': round(driver['S3'].mean(), 3),
+                'Stint': int(info[0][1]),
+                'Compound': driver['Compound'].iloc[0],
+                'StartTyreWear': int(driver['TyreLife'].iloc[0] - 1),
+                'StintLength': len(driver) + 2,
+                'StartLap': int(driver['LapNumber'].min() - 1),
+                'EndLap': int(driver['LapNumber'].max() + 1)
+            }, 
+            index=[info[0][0]]
+        )
+        
+        result = pd.concat([result,newStintDataFrame])
+
+    result.sort_values(by='AverageLapTime', inplace=True)
+    return result
 
 def speed_traps(laps: core.Laps) -> pd.DataFrame:
     result = pd.DataFrame(columns=['SpeedTrap'])
