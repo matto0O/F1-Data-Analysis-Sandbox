@@ -105,38 +105,42 @@ def long_runs(laps: core.Laps) -> pd.DataFrame:
     result.sort_values(by='AverageLapTime', inplace=True)
     return result[result['StintLength'] >= 5]
 
-def race_pace(laps: core.Laps) -> pd.DataFrame:
-    laps = remove_pitstops(laps)
-    laps = remove_safetycar(laps)
+def race_pace(laps: core.Laps, orderBy: str = "AverageLapTime") -> pd.DataFrame:
+    #laps = remove_pitstops(laps)
+    #laps = remove_safetycar(laps)
 
     if not "LapTimeSeconds" in laps.columns:
         laps = laps_simplified(laps)
 
-    result = pd.DataFrame(columns=['AverageLapTime', 'AverageS1', 'AverageS2', 'AverageS3', 'Stint', 'StartLap', 'EndLap', 'Compound', 'StartTyreWear', 'StintLength'])
+    result = pd.DataFrame(columns=['AverageLapTime', 'AverageS1', 'AverageS2', 'AverageS3', 'TyreDeg', 'Stint', 'StartLap', 'EndLap', 'Compound', 'StartTyreWear', 'StintLength'])
     lapsCopy = laps.copy()
 
     for info in lapsCopy.groupby(['Driver', 'Stint']):
         driver = info[1]
+        stintLen = len(driver)
+        lapsFiltered = remove_cruising(driver)
+        properLapCount = len(lapsFiltered)
         newStintDataFrame = pd.DataFrame\
         (
             {
-                'AverageLapTime': round(driver['LapTimeSeconds'].mean(), 3),
-                'AverageS1': round(driver['S1'].mean(), 3),
-                'AverageS2': round(driver['S2'].mean(), 3),
-                'AverageS3': round(driver['S3'].mean(), 3),
+                'AverageLapTime': round(lapsFiltered['LapTimeSeconds'].mean(), 3),
+                'AverageS1': round(lapsFiltered['S1'].mean(), 3),
+                'AverageS2': round(lapsFiltered['S2'].mean(), 3),
+                'AverageS3': round(lapsFiltered['S3'].mean(), 3),
+                'TyreDeg': round((lapsFiltered['LapTimeSeconds'].max() - lapsFiltered['LapTimeSeconds'].min()) / properLapCount, 3),
                 'Stint': int(info[0][1]),
                 'Compound': driver['Compound'].iloc[0],
-                'StartTyreWear': int(driver['TyreLife'].iloc[0] - 1),
-                'StintLength': len(driver) + 2,
-                'StartLap': int(driver['LapNumber'].min() - 1),
-                'EndLap': int(driver['LapNumber'].max() + 1)
+                'StartTyreWear': int(driver['TyreLife'].iloc[0]),
+                'StintLength': stintLen,
+                'StartLap': int(driver['LapNumber'].min()),
+                'EndLap': int(driver['LapNumber'].max())
             }, 
             index=[info[0][0]]
         )
         
         result = pd.concat([result,newStintDataFrame])
 
-    result.sort_values(by='AverageLapTime', inplace=True)
+    result.sort_values(by=orderBy, inplace=True)
     return result
 
 def speed_traps(laps: core.Laps) -> pd.DataFrame:

@@ -9,10 +9,12 @@ from myutils import *
 #  IsPersonalBest, Compound, TyreLife, FreshTyre, Team, LapStartTime, LapStartDate, TrackStatus, Position, Deleted, DeletedReason, FastF1Generated, IsAccurate
 # AirTemp Humidity Pressure Rainfall TrackTemp  WindDirection  WindSpeed]
 
-event = fastf1.get_event(2024, 'Australia', backend='f1timing')
+event = fastf1.get_event(2024, 'Japan', backend='f1timing')
 
 race = event.get_race()
 race.load(telemetry=False, weather=False, messages=False)
 laps = race.laps
+
+print(race_pace(laps, 'TyreDeg'))
 
 # TODO - driver comparison, weather support, charts, telemetry
